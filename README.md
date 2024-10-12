@@ -4,9 +4,9 @@
 This microservice is responsible for storing and managing users' pet information. It provides a RESTful API to perform CRUD operations on pet records stored in a database.
 
 ## Tech Stack
-* **Lenguaje:** GO v1.23.2.
+* **Lenguaje:** GO 1.23.2.
 * **Api:** GO-swagger (OpenApi 2.0)
-* **Base de datos:** PostgreSQL
+* **Base de datos:** PostgreSQL 17
 
 ## Software architecture
 The project structure has been modeled following the hexagonal architecture pattern with the addition of vertical slicing and screaming architecture. The code follows the principles of clean architectures seeking to facilitate aspects such as maintainability, scalability and testability.
@@ -24,7 +24,7 @@ The project structure has been modeled following the hexagonal architecture patt
 - /test --> Test resources.
 
 ## Base de datos
-Port: 5432 | admin : admin | iskaypet : iskaypet
+Port: 5432 | postgres : admin | admin : admin | iskaypet : iskaypet
 
 ## API Reference
 
