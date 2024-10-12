@@ -15,8 +15,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: github.com
-basePath: /AMAndres/iskaypetchallenge/docs
+host: localhost:8081
 tags:
 - name: "pet"
   description: "Everything about Pet entity"
@@ -25,6 +24,15 @@ tags:
 schemes:
 - "http"
 paths:
+  /health:
+    get:
+      tags:
+      - "pet"
+      summary: "TEST AGAINST LOCALHOST"
+      responses:
+        200:
+          description: "successful operation"
+
   /pet:
     post:
       tags:

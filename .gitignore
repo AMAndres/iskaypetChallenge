@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+# Exclude models from go-swagger
+models/
+
+# Exclude api auto-generated
+restapi/operations
+restapi/doc.go
+restapi/embedded_spec.go
+restapi/server.go

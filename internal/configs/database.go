@@ -2,31 +2,29 @@ package config
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/lib/pq"
-	"github.com/sirupsen/logrus"
 )
 
 var db *sql.DB
 
-func InitDB() {
+func InitDatabase() error {
 
 	var err error
 
 	db, err = sql.Open("postgres", getDBConfig())
 	if err != nil {
-		logrus.Error("Error al conectar a la base de datos:", err)
-		return
+		return errors.New(fmt.Sprintf("Error al conectar a la base de datos. Error: %s", err.Error()))
 	}
 
 	err = db.Ping()
 	if err != nil {
-		logrus.Error("Error al verificar la conexión:", err)
-		return
+		return errors.New(fmt.Sprintf("Error al verificar la conexión. Error: %s", err.Error()))
 	}
 
-	logrus.Info("Conexión a la base de datos establecida")
+	return nil
 }
 
 func getDBConfig() string {
