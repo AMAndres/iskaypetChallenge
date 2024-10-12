@@ -10,7 +10,7 @@ import (
 
 func InitHealthcheck() {
 	http.HandleFunc("/health", healthCheckHandler)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(":8082", nil)
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
