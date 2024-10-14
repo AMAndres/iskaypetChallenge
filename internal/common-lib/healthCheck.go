@@ -9,6 +9,7 @@ import (
 )
 
 func InitHealthcheck() {
+	// TODO: Store port as OS env variable
 	http.HandleFunc("/health", healthCheckHandler)
 	http.ListenAndServe(":8082", nil)
 }

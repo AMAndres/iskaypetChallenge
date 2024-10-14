@@ -7,8 +7,6 @@ package models
 
 import (
 	"context"
-	"encoding/json"
-	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -21,34 +19,46 @@ import (
 // swagger:model Pet
 type Pet struct {
 
-	// category
-	Category *Category `json:"category,omitempty"`
+	// birthday
+	// Example: 2017-01-01
+	// Required: true
+	// Format: date
+	Birthday *strfmt.Date `json:"birthday"`
+
+	// gender
+	// Required: true
+	// Maximum: 1
+	// Minimum: 0
+	Gender *int64 `json:"gender"`
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	// Required: true
+	ID *int64 `json:"id"`
 
 	// name
-	// Example: doggie
+	// Example: faro
 	// Required: true
 	Name *string `json:"name"`
 
-	// photo urls
-	// Required: true
-	PhotoUrls []string `json:"photoUrls" xml:"photoUrls"`
-
-	// pet status in the store
-	// Enum: ["available","pending","sold"]
-	Status string `json:"status,omitempty"`
-
-	// tags
-	Tags []*Tag `json:"tags" xml:"tags"`
+	// species
+	// Maximum: 1
+	// Minimum: 0
+	Species *int64 `json:"species,omitempty"`
 }
 
 // Validate validates this pet
 func (m *Pet) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCategory(formats); err != nil {
+	if err := m.validateBirthday(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGender(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,15 +66,7 @@ func (m *Pet) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validatePhotoUrls(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
+	if err := m.validateSpecies(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,20 +76,40 @@ func (m *Pet) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Pet) validateCategory(formats strfmt.Registry) error {
-	if swag.IsZero(m.Category) { // not required
-		return nil
+func (m *Pet) validateBirthday(formats strfmt.Registry) error {
+
+	if err := validate.Required("birthday", "body", m.Birthday); err != nil {
+		return err
 	}
 
-	if m.Category != nil {
-		if err := m.Category.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("category")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("category")
-			}
-			return err
-		}
+	if err := validate.FormatOf("birthday", "body", "date", m.Birthday.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Pet) validateGender(formats strfmt.Registry) error {
+
+	if err := validate.Required("gender", "body", m.Gender); err != nil {
+		return err
+	}
+
+	if err := validate.MinimumInt("gender", "body", *m.Gender, 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("gender", "body", *m.Gender, 1, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Pet) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
+		return err
 	}
 
 	return nil
@@ -102,147 +124,24 @@ func (m *Pet) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Pet) validatePhotoUrls(formats strfmt.Registry) error {
-
-	if err := validate.Required("photoUrls", "body", m.PhotoUrls); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var petTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["available","pending","sold"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		petTypeStatusPropEnum = append(petTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// PetStatusAvailable captures enum value "available"
-	PetStatusAvailable string = "available"
-
-	// PetStatusPending captures enum value "pending"
-	PetStatusPending string = "pending"
-
-	// PetStatusSold captures enum value "sold"
-	PetStatusSold string = "sold"
-)
-
-// prop value enum
-func (m *Pet) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, petTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Pet) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(m.Status) { // not required
+func (m *Pet) validateSpecies(formats strfmt.Registry) error {
+	if swag.IsZero(m.Species) { // not required
 		return nil
 	}
 
-	// value enum
-	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+	if err := validate.MinimumInt("species", "body", *m.Species, 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("species", "body", *m.Species, 1, false); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *Pet) validateTags(formats strfmt.Registry) error {
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.Tags); i++ {
-		if swag.IsZero(m.Tags[i]) { // not required
-			continue
-		}
-
-		if m.Tags[i] != nil {
-			if err := m.Tags[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("tags" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ContextValidate validate this pet based on the context it is used
+// ContextValidate validates this pet based on context it is used
 func (m *Pet) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateCategory(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateTags(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *Pet) contextValidateCategory(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Category != nil {
-
-		if swag.IsZero(m.Category) { // not required
-			return nil
-		}
-
-		if err := m.Category.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("category")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("category")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *Pet) contextValidateTags(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.Tags); i++ {
-
-		if m.Tags[i] != nil {
-
-			if swag.IsZero(m.Tags[i]) { // not required
-				return nil
-			}
-
-			if err := m.Tags[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("tags" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("tags" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 

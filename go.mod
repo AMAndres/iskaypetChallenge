@@ -14,6 +14,8 @@ require (
 	golang.org/x/net v0.30.0
 )
 
+require golang.org/x/perf v0.0.0-20241004173025-94b0db8a2472 // indirect
+
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -30,5 +32,6 @@ require (
 	go.mongodb.org/mongo-driver v1.17.1 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
+	gonum.org/v1/gonum v0.15.1
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
