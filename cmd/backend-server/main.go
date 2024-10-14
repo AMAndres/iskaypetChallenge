@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/AMAndres/iskaypetChallenge/internal/commonlib"
+	commonlib "github.com/AMAndres/iskaypetChallenge/internal/common-lib"
 	config "github.com/AMAndres/iskaypetChallenge/internal/configs"
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +37,7 @@ func main() {
 	logrus.Info(" ** Dependencies loaded")
 
 	// REST API
-	go config.GoSwaggerApi()
+	go config.StartGoSwaggerApi()
 	logrus.Info(" ** API rest service loaded")
 
 	// Keep server running

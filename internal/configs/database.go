@@ -2,7 +2,6 @@ package config
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	_ "github.com/lib/pq"
@@ -16,12 +15,12 @@ func InitDatabase() error {
 
 	db, err = sql.Open("postgres", getDBConfig())
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error al conectar a la base de datos. Error: %s", err.Error()))
+		return fmt.Errorf("error al conectar a la base de datos. Error: %s", err.Error())
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error al verificar la conexión. Error: %s", err.Error()))
+		return fmt.Errorf("error al verificar la conexión. Error: %s", err.Error())
 	}
 
 	return nil
@@ -29,13 +28,12 @@ func InitDatabase() error {
 
 func getDBConfig() string {
 
-	//connStr := "postgres://iskaypet:iskaypet@127.0.0.1:5432/postgres?sslmode=disable"
-
+	// TODO: Store properties as secrets via cloud provider / argocd / kubernetes / etc
 	host := "localhost"
 	port := 5432
-	user := "iskaypet"
-	password := "iskaypet"
-	dbname := "postgres"
+	user := "postgres"
+	password := "admin"
+	dbname := "iskaypetchallenge"
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",

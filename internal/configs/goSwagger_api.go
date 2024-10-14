@@ -8,7 +8,7 @@ import (
 	"github.com/go-openapi/loads"
 )
 
-func GoSwaggerApi() {
+func StartGoSwaggerApi() {
 
 	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
 	if err != nil {
@@ -19,6 +19,7 @@ func GoSwaggerApi() {
 	server := restapi.NewServer(api)
 	defer server.Shutdown()
 
+	// TODO: Store port as OS env variable
 	server.Port = 8081
 	server.ConfigureAPI()
 	if err := server.Serve(); err != nil {
