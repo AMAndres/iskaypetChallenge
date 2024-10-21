@@ -8,6 +8,8 @@ import (
 
 	. "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
 	"github.com/AMAndres/iskaypetChallenge/internal/core/pets/domain"
+	domainErrors "github.com/AMAndres/iskaypetChallenge/internal/core/transversal/domain/errors"
+	apiModels "github.com/AMAndres/iskaypetChallenge/models"
 	"github.com/AMAndres/iskaypetChallenge/test/mocks"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
@@ -35,151 +37,221 @@ var _ = Describe("PetService", func() {
 		petService = NewPetService(mockPetRepository)
 	})
 
-	// AddPet()
-	Context("Scenario - Adding some regular pet", func() {
+	Describe("AddPet()", func() {
+		Context("Scenario - Adding some regular pet", func() {
 
-		dPet := getDomainPet()
-		dbPet := getDatabasePet()
+			dPet := getDomainPet()
+			dbPet := getDatabasePet()
 
-		It("Success", func() {
+			It("Success - Pet added successfully", func() {
 
-			mockPetRepository.EXPECT().AddPet(ctx, dPet).Return(dbPet, nil).Times(1)
-			serviceResponse, serviceErr := petService.AddPet(ctx, dPet)
+				mockPetRepository.EXPECT().AddPet(ctx, dPet).Return(dbPet, nil).Times(1)
+				serviceResponse, serviceErr := petService.AddPet(ctx, dPet)
 
-			Expect(serviceErr).To(BeNil())
-			Expect(serviceResponse).To(Equal(dbPet))
-		})
+				Expect(serviceErr).To(BeNil())
+				Expect(serviceResponse).To(Equal(dbPet))
+			})
 
-		It("Error - Repository fails when adding a pet", func() {
+			It("Error - Repository fails when adding a pet", func() {
 
-			dbError := errors.New("Any error")
-			expectedErr := dbError
+				dbError := errors.New("Any error")
+				expectedErr := dbError
 
-			mockPetRepository.EXPECT().AddPet(ctx, dPet).Return(nil, dbError).Times(1)
-			serviceResponse, serviceErr := petService.AddPet(ctx, dPet)
+				mockPetRepository.EXPECT().AddPet(ctx, dPet).Return(nil, dbError).Times(1)
+				serviceResponse, serviceErr := petService.AddPet(ctx, dPet)
 
-			Expect(serviceResponse).To(BeNil())
-			Expect(serviceErr).To(Equal(expectedErr))
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
+			})
 		})
 	})
 
-	/*
-		Describe("GetPetAppById", func() {
-			Context("Scenario - Database has some pets", func() {
-				It("Success - The pet associated to the ID provided is retrieved", func() {
+	Describe("GetAllPets()", func() {
+		Context("Scenario - Database has some pets", func() {
 
-					expectedPetID := int64(1)
-					birthday, _ := time.Parse("2022-01-01", "2006-01-02")
-					expectedResponse := &domain.Pet{
-						ID:       expectedPetID,
-						Name:     "Firulais",
-						Species:  0,
-						Birthday: birthday,
-					}
+			dbPets := getDatabasePets()
 
-					mockPetRepository.On("GetPetById", ctx, expectedPetID).Return(expectedResponse, nil).Once()
+			It("Success - DB returns one or more pets", func() {
 
-					serviceResponse, err := petService.GetPetAppById(ctx, domain.Pet{ID: expectedPetID})
-					Expect(err).To(BeNil())
-					Expect(serviceResponse).To(Equal(expectedResponse))
-				})
+				mockPetRepository.EXPECT().GetAllPets(ctx).Return(dbPets, nil).Times(1)
+				serviceResponse, serviceErr := petService.GetAllPets(ctx)
 
-				It("Error - Repository fails retrieving pet", func() {
+				Expect(serviceErr).To(BeNil())
+				Expect(serviceResponse).To(Equal(dbPets))
+			})
 
-					expectedPetID := int64(1)
-					expectedErr := errors.New("Any error")
+			It("Error - Repository fails retrieving pet", func() {
 
-					mockPetRepository.On("GetPetById", ctx, expectedPetID).Return(nil, expectedErr).Once()
+				expectedErr := errors.New("Any error")
 
-					_, err := petService.GetPetAppById(ctx, domain.Pet{ID: expectedPetID})
-					Expect(err).To(Equal(expectedErr))
-				})
+				mockPetRepository.EXPECT().GetAllPets(ctx).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.GetAllPets(ctx)
+
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
+			})
+		})
+		Context("Scenario - Database is emmpty", func() {
+			It("Success - DB returns one or more pets", func() {
+
+				expectedErr := domainErrors.NewNotFoundError("pets not found")
+
+				mockPetRepository.EXPECT().GetAllPets(ctx).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.GetAllPets(ctx)
+
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
+			})
+
+			It("Error - Repository fails retrieving pet", func() {
+
+				expectedErr := errors.New("Any error")
+
+				mockPetRepository.EXPECT().GetAllPets(ctx).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.GetAllPets(ctx)
+
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
+			})
+		})
+	})
+
+	Describe("GetPetAppById()", func() {
+		Context("Scenario - Retrieving a pet by ID", func() {
+
+			id := int64(1)
+			dbPet := getDatabasePet()
+
+			It("Success - DB returns the Pet associated to the ID provided", func() {
+
+				mockPetRepository.EXPECT().GetPetById(ctx, id).Return(dbPet, nil).Times(1)
+				serviceResponse, serviceErr := petService.GetPetAppById(ctx, *dbPet)
+
+				Expect(serviceErr).To(BeNil())
+				Expect(serviceResponse).To(Equal(dbPet))
+			})
+
+			It("Sucess - DB does not have record for the ID provided", func() {
+
+				expectedErr := domainErrors.NewNotFoundError("pet not found")
+
+				mockPetRepository.EXPECT().GetPetById(ctx, id).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.GetPetAppById(ctx, *dbPet)
+
+				Expect(serviceErr).To(Equal(expectedErr))
+				Expect(serviceResponse).To(BeNil())
+			})
+
+			It("Error - Repository fails retrieving pet", func() {
+
+				expectedErr := errors.New("Any error")
+
+				mockPetRepository.EXPECT().GetPetById(ctx, id).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.GetPetAppById(ctx, *dbPet)
+
+				Expect(serviceErr).To(Equal(expectedErr))
+				Expect(serviceResponse).To(BeNil())
+			})
+		})
+	})
+
+	Describe("MostNumerousSpecies()", func() {
+		Context("Scenario - Database has some pets", func() {
+			It("Success - Returns data related to the most numerous species", func() {
+
+				expectedSpecies := int64(0)
+				expectedSpeciesDesc := "Dog"
+				expectedQty := int64(3)
+
+				dbResponse := apiModels.KpiMostNumerousSpecies{
+					MostNumerousSpecies:            &expectedSpecies,
+					MostNumerousSpeciesDescription: expectedSpeciesDesc,
+					MostNumerousSpeciesQty:         &expectedQty,
+				}
+
+				mockPetRepository.EXPECT().MostNumerousSpecies(ctx).Return(&dbResponse, nil).Times(1)
+				serviceResponse, serviceErr := petService.MostNumerousSpecies(ctx)
+
+				Expect(serviceResponse.MostNumerousSpecies).To(Equal(dbResponse.MostNumerousSpecies))
+				Expect(serviceResponse.MostNumerousSpeciesDescription).To(Equal(dbResponse.MostNumerousSpeciesDescription))
+				Expect(serviceResponse.MostNumerousSpeciesQty).To(Equal(dbResponse.MostNumerousSpeciesQty))
+				Expect(serviceErr).To(BeNil())
+			})
+
+			It("Error - Some error with database", func() {
+
+				expectedErr := errors.New("Any error")
+
+				mockPetRepository.EXPECT().MostNumerousSpecies(ctx).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.MostNumerousSpecies(ctx)
+
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
 			})
 		})
 
-		Describe("MostNumerousSpecies", func() {
-			Context("Scenario - Database has some pets", func() {
-				It("Success - Returns data related to the most numerous species", func() {
+		Context("Scenario - Database is empty", func() {
+			It("Sucess - DB does not have records", func() {
 
-					mns := int64(0)
-					mnsqty := int64(3)
+				expectedErr := domainErrors.NewNotFoundError("species not found")
 
-					expectedSpecies := 3
-					expectedSpeciesDesc := "Dog"
-					expectedQty := 3
+				mockPetRepository.EXPECT().MostNumerousSpecies(ctx).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.MostNumerousSpecies(ctx)
 
-					mockPetRepository.On("MostNumerousSpecies", ctx).Return(&apiModels.KpiMostNumerousSpecies{
-						MostNumerousSpecies:            &mns,
-						MostNumerousSpeciesDescription: "Dog",
-						MostNumerousSpeciesQty:         &mnsqty,
-					}, nil).Once()
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
+			})
+		})
+	})
 
-					serviceResponse, err := petService.MostNumerousSpecies(ctx)
-					Expect(err).To(BeNil())
-					Expect(serviceResponse.MostNumerousSpecies).To(Equal(expectedSpecies))
-					Expect(serviceResponse.MostNumerousSpeciesDescription).To(Equal(expectedSpeciesDesc))
-					Expect(serviceResponse.MostNumerousSpeciesQty).To(Equal(expectedQty))
-				})
+	Describe("AverageAge()", func() {
+		Context("Scenario - Database has some pets", func() {
+			It("Success - Returns average age for the required species", func() {
 
-				It("Error - Some error with database", func() {
+				speciesName := "Cat"
+				birthday1 := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+				birthday2 := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+				expectedAge := 3.3
+				expectedAgeStdDeviation := 2.12
 
-					expectedErr := errors.New("Any error")
+				mockPetRepository.EXPECT().GetAllPetsBySpecies(ctx, speciesName).Return(&[]domain.Pet{
+					{Birthday: birthday1},
+					{Birthday: birthday2},
+				}, nil).Times(1)
+				serviceResponse, serviceErr := petService.AverageAge(ctx, &speciesName)
 
-					mockPetRepository.On("MostNumerousSpecies", ctx).Return(nil, expectedErr).Once()
-
-					_, err := petService.MostNumerousSpecies(ctx)
-					Expect(err).To(Equal(expectedErr))
-				})
+				Expect(serviceResponse.AverageAge).Should(BeNumerically("~", expectedAge, 0.01))
+				Expect(serviceResponse.AgeStandardDeviation).Should(BeNumerically("~", expectedAgeStdDeviation, 0.01))
+				Expect(serviceErr).To(BeNil())
 			})
 
-			Context("Scenario - Database is empty", func() {
-				It("Sucess - Return an error", func() {
+			It("Error - Error accesing db", func() {
 
-					expectedErr := errors.New("species not found")
+				speciesName := "Dog"
+				expectedErr := errors.New("Any error")
 
-					mockPetRepository.On("MostNumerousSpecies", ctx).Return(nil, expectedErr).Once()
+				mockPetRepository.EXPECT().GetAllPetsBySpecies(ctx, speciesName).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.AverageAge(ctx, &speciesName)
 
-					serviceResponse, err := petService.MostNumerousSpecies(ctx)
-					Expect(err).NotTo(BeNil())
-					Expect(serviceResponse).To(BeNil())
-				})
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
 			})
 		})
 
-		Describe("AverageAge", func() {
-			Context("Scenario - Database has some pets", func() {
-				It("Success - Returns average age for the required species", func() {
+		Context("Scenario - Database is empty", func() {
+			It("Sucess - DB does not have records", func() {
 
-					speciesName := "Cat"
-					//expectedAge := 2.5
-					birthday1, _ := time.Parse("2021-01-01", "2006-01-02")
-					birthday2, _ := time.Parse("2022-01-01", "2006-01-02")
+				speciesName := "Dog"
+				expectedErr := domainErrors.NewNotFoundError("species not found")
 
-					mockPetRepository.On("GetAllPetsBySpecies", ctx, speciesName).Return([]domain.Pet{
-						{Birthday: birthday1},
-						{Birthday: birthday2},
-					}, nil).Once()
+				mockPetRepository.EXPECT().GetAllPetsBySpecies(ctx, speciesName).Return(nil, expectedErr).Times(1)
+				serviceResponse, serviceErr := petService.AverageAge(ctx, &speciesName)
 
-					serviceResponse, err := petService.AverageAge(ctx, &speciesName)
-					Expect(err).To(BeNil())
-					//Expect(serviceResponse.AverageAge).To(BeNearTolerance(expectedAge, 0.1))
-					Expect(serviceResponse.AverageAge).NotTo(BeZero())
-					Expect(serviceResponse.AgeStandardDeviation).NotTo(BeZero())
-				})
-
-				It("Error - Error accesing db", func() {
-
-					speciesName := "Cat"
-					expectedErr := errors.New("Any error")
-
-					mockPetRepository.On("GetAllPetsBySpecies", ctx, speciesName).Return(nil, expectedErr).Once()
-
-					_, err := petService.AverageAge(ctx, &speciesName)
-					Expect(err).To(Equal(expectedErr))
-				})
+				Expect(serviceResponse).To(BeNil())
+				Expect(serviceErr).To(Equal(expectedErr))
 			})
 		})
-	*/
+	})
 })
 
 func getDomainPet() *domain.Pet {
@@ -197,4 +269,16 @@ func getDatabasePet() *domain.Pet {
 	pet := getDomainPet()
 	pet.ID = 1
 	return pet
+}
+
+func getDatabasePets() *[]domain.Pet {
+	response := make([]domain.Pet, 2)
+
+	response[0] = *getDomainPet()
+	response[0].ID = 1
+
+	response[1] = *getDomainPet()
+	response[1].ID = 2
+
+	return &response
 }
