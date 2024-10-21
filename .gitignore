@@ -28,3 +28,6 @@ restapi/operations
 restapi/doc.go
 restapi/embedded_spec.go
 restapi/server.go
+
+# Exclude models from go-swagger
+test/mocks

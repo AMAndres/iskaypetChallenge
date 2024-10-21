@@ -4,6 +4,7 @@ import (
 	"context"
 
 	kpiService "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
+	domainErrors "github.com/AMAndres/iskaypetChallenge/internal/core/transversal/domain/errors"
 	operationsKpi "github.com/AMAndres/iskaypetChallenge/restapi/operations/kpis"
 	"github.com/go-openapi/runtime/middleware"
 )
@@ -12,7 +13,12 @@ func KpiMostNumerousSpeciesHandler(params operationsKpi.MostNumerousSpeciesParam
 
 	response, err := kpiService.GetService().MostNumerousSpecies(context.Background())
 	if err != nil {
-		return operationsKpi.NewMostNumerousSpeciesInternalServerError()
+		switch err.(type) {
+		case *domainErrors.NotFoundError:
+			return operationsKpi.NewMostNumerousSpeciesNoContent()
+		default:
+			return operationsKpi.NewMostNumerousSpeciesInternalServerError()
+		}
 	}
 
 	return operationsKpi.NewMostNumerousSpeciesOK().WithPayload(response)

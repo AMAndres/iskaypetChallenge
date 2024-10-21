@@ -112,6 +112,8 @@ paths:
           description: "The kpi values"
           schema:
             $ref: "#/definitions/KpiMostNumerousSpecies"
+        204:
+          description: "No content - Can't provide this kpi because no pets are stored"
         500:
           description: "Internal server error - Unexpected error while processing the request"
 
@@ -208,6 +210,8 @@ definitions:
       average_age:
         type: "number"
         format: "double"
+        x-omitempty: false
       age_standard_deviation:
         type: "number"
         format: "double"
+        x-omitempty: false
