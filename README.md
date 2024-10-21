@@ -46,6 +46,8 @@ net stop postgresql-x64-17
 - https://github.com/golang/mock
 
 ```bash
+ go get -u github.com/golang/mock/gomock
+ go install github.com/golang/mock/mockgen@latest
 mockgen -source ./internal/core/pets/domain/pet_repository_interface.go -destination=./test/mocks/pet_repository_mock.go -package=mocks
 ```
 
