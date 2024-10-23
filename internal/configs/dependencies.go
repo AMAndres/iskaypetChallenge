@@ -1,12 +1,15 @@
 package config
 
 import (
-	petService "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
-	petsInfraestructure "github.com/AMAndres/iskaypetChallenge/internal/core/pets/infraestructure"
+	petApp "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
+	petInfra "github.com/AMAndres/iskaypetChallenge/internal/core/pets/infraestructure"
 )
 
 func InjectDependencies() {
 
-	// GetPets Service
-	petService.NewPetService(petsInfraestructure.NewPostgresPetRepository(GetDB()))
+	// Repositories
+	petRepo := petInfra.PetRepositoryPgInstance.NewRepository(GetDB())
+
+	// Services
+	_ = petApp.PetServiceInstance.NewPetService(petRepo)
 }

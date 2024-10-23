@@ -8,6 +8,7 @@ import (
 )
 
 type PetService interface {
+	NewPetService(ps *petDomain.PetRepository) *PetService
 	AddPet(ctx context.Context, pet *petDomain.Pet) (*petDomain.Pet, error)
 	GetAllPets(ctx context.Context) (*[]petDomain.Pet, error)
 	GetPetAppById(ctx context.Context, pet petDomain.Pet) (*petDomain.Pet, error)

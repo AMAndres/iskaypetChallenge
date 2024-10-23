@@ -7,7 +7,7 @@ This microservice is responsible for storing and managing users' pet information
 * **Lenguage:** GO 1.23.2.
 * **Api:** GO-swagger (OpenApi 2.0)
 * **Database:** PostgreSQL 17
-* **Unit test suit:** Ginkgo + Gomega
+* **Unit test suit:** Ginkgo + Gomega + Gomock
 
 ## Software architecture
 The project structure has been modeled following the hexagonal architecture pattern with the addition of vertical slicing and screaming architecture. The code follows the principles of clean architectures seeking to facilitate aspects such as maintainability, scalability and testability.
@@ -48,7 +48,7 @@ net stop postgresql-x64-17
 ```bash
  go get -u github.com/golang/mock/gomock
  go install github.com/golang/mock/mockgen@latest
-mockgen -source ./internal/core/pets/domain/pet_repository_interface.go -destination=./test/mocks/pet_repository_mock.go -package=mocks
+ mockgen -source ./internal/core/pets/domain/pet_repository_interface.go -destination=./test/mocks/pet_repository_mock.go -package=mocks
 ```
 
 **Ginkgo**
@@ -65,10 +65,10 @@ https://www.sobyte.net/post/2021-06/using-gomock-for-unit-testing-in-go/
 
 **Launch test and coverage**
 ```bash
-go test ./internal/core/pets/application/pet_service_test.go
-go test -cover ./internal/core/pets/application/pet_service_test.go
-go test ./internal/core/pets/application/pet_service_test.go -coverprofile=cover.out
-go tool cover -html=cover.out
+cd ./internal/core/pets/application
+go test pet_service_test.go
+go test -coverprofile=coverage.out
+go tool cover -html=coverage.out
 ```
 
 ## API Reference
