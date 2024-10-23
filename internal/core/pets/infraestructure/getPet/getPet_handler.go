@@ -3,7 +3,7 @@ package infraestructure
 import (
 	"context"
 
-	petService "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
+	petApp "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
 	petDomain "github.com/AMAndres/iskaypetChallenge/internal/core/pets/domain"
 	petMapper "github.com/AMAndres/iskaypetChallenge/internal/core/pets/infraestructure"
 	domainErrors "github.com/AMAndres/iskaypetChallenge/internal/core/transversal/domain/errors"
@@ -13,7 +13,7 @@ import (
 
 func GetPetsByIDHandler(params operationApi.GetPetsByIDParams) middleware.Responder {
 
-	pet, err := petService.GetService().GetPetAppById(context.Background(), petDomain.Pet{ID: params.PetID})
+	pet, err := petApp.PetServiceInstance.GetPetAppById(context.Background(), petDomain.Pet{ID: params.PetID})
 	if err != nil {
 		switch err.(type) {
 		case *domainErrors.NotFoundError:

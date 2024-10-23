@@ -10,38 +10,42 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
+var PetServiceInstance PetServiceImpl
+
 type PetServiceImpl struct {
-	petRepository petDomain.PetRepository
+	petRepository *petDomain.PetRepository
 }
 
-var petServiceInstance *PetServiceImpl
+func init() {
+	PetServiceInstance = PetServiceImpl{}
+}
 
-func NewPetService(ps petDomain.PetRepository) *PetServiceImpl {
-	petServiceInstance = &PetServiceImpl{
-		petRepository: ps,
+func (o *PetServiceImpl) NewPetService(ps *petDomain.PetRepository) *PetService {
+
+	// Idempotent behavior
+	if PetServiceInstance.petRepository == nil {
+		PetServiceInstance.petRepository = ps
 	}
 
-	return petServiceInstance
-}
+	iFace := PetService(&PetServiceInstance)
 
-func GetService() *PetServiceImpl {
-	return petServiceInstance
+	return &iFace
 }
 
 func (o *PetServiceImpl) AddPet(ctx context.Context, pet *petDomain.Pet) (*petDomain.Pet, error) {
-	return o.petRepository.AddPet(ctx, pet)
+	return (*o.petRepository).AddPet(ctx, pet)
 }
 
 func (o *PetServiceImpl) GetAllPets(ctx context.Context) (*[]petDomain.Pet, error) {
-	return o.petRepository.GetAllPets(ctx)
+	return (*o.petRepository).GetAllPets(ctx)
 }
 
 func (o *PetServiceImpl) GetPetAppById(ctx context.Context, pet petDomain.Pet) (*petDomain.Pet, error) {
-	return o.petRepository.GetPetById(ctx, pet.ID)
+	return (*o.petRepository).GetPetById(ctx, pet.ID)
 }
 
 func (o *PetServiceImpl) MostNumerousSpecies(ctx context.Context) (*apiModels.KpiMostNumerousSpecies, error) {
-	return o.petRepository.MostNumerousSpecies(ctx)
+	return (*o.petRepository).MostNumerousSpecies(ctx)
 }
 
 func (o *PetServiceImpl) AverageAge(ctx context.Context, speciesName *string) (*apiModels.KpiAverageAge, error) {
@@ -63,14 +67,14 @@ func (o *PetServiceImpl) AverageAge(ctx context.Context, speciesName *string) (*
 	return &response, nil
 }
 
-func averageAgeBySpecies(ctx context.Context, speciesName string, repo petDomain.PetRepository) (float64, *[]float64, error) {
+func averageAgeBySpecies(ctx context.Context, speciesName string, repo *petDomain.PetRepository) (float64, *[]float64, error) {
 
 	var err error
 	var pets *[]petDomain.Pet
 	var ageAggregation float64
 	var ageCollection []float64
 
-	pets, err = repo.GetAllPetsBySpecies(ctx, speciesName)
+	pets, err = (*repo).GetAllPetsBySpecies(ctx, speciesName)
 	if err != nil {
 		return 0.0, nil, err
 	}

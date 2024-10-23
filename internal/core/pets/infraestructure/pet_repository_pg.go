@@ -9,17 +9,29 @@ import (
 	apiModels "github.com/AMAndres/iskaypetChallenge/models"
 )
 
-type PostgresPetRepository struct {
+var PetRepositoryPgInstance PetRepositoryPg
+
+type PetRepositoryPg struct {
 	db *sql.DB
 }
 
-func NewPostgresPetRepository(db *sql.DB) *PostgresPetRepository {
-	return &PostgresPetRepository{
-		db: db,
-	}
+func init() {
+	PetRepositoryPgInstance = PetRepositoryPg{}
 }
 
-func (pr *PostgresPetRepository) GetPetById(ctx context.Context, id int64) (*petDomain.Pet, error) {
+func (pr *PetRepositoryPg) NewRepository(db *sql.DB) *petDomain.PetRepository {
+
+	// Idempotent behavior
+	if PetRepositoryPgInstance.db == nil {
+		PetRepositoryPgInstance.db = db
+	}
+
+	iFace := petDomain.PetRepository(&PetRepositoryPgInstance)
+
+	return &iFace
+}
+
+func (pr *PetRepositoryPg) GetPetById(ctx context.Context, id int64) (*petDomain.Pet, error) {
 
 	var pet petDomain.Pet
 
@@ -51,7 +63,7 @@ func (pr *PostgresPetRepository) GetPetById(ctx context.Context, id int64) (*pet
 	return &pet, nil
 }
 
-func (pr *PostgresPetRepository) GetAllPets(ctx context.Context) (*[]petDomain.Pet, error) {
+func (pr *PetRepositoryPg) GetAllPets(ctx context.Context) (*[]petDomain.Pet, error) {
 
 	var pets []petDomain.Pet
 
@@ -100,7 +112,7 @@ func (pr *PostgresPetRepository) GetAllPets(ctx context.Context) (*[]petDomain.P
 	return &pets, nil
 }
 
-func (pr *PostgresPetRepository) GetAllPetsBySpecies(ctx context.Context, species string) (*[]petDomain.Pet, error) {
+func (pr *PetRepositoryPg) GetAllPetsBySpecies(ctx context.Context, species string) (*[]petDomain.Pet, error) {
 
 	var pets []petDomain.Pet
 
@@ -149,7 +161,7 @@ func (pr *PostgresPetRepository) GetAllPetsBySpecies(ctx context.Context, specie
 	return &pets, nil
 }
 
-func (pr *PostgresPetRepository) AddPet(ctx context.Context, pet *petDomain.Pet) (*petDomain.Pet, error) {
+func (pr *PetRepositoryPg) AddPet(ctx context.Context, pet *petDomain.Pet) (*petDomain.Pet, error) {
 
 	// Transaction management
 	tx, err := pr.db.BeginTx(ctx, nil)
@@ -178,7 +190,7 @@ func (pr *PostgresPetRepository) AddPet(ctx context.Context, pet *petDomain.Pet)
 	return pet, nil
 }
 
-func (pr *PostgresPetRepository) MostNumerousSpecies(ctx context.Context) (*apiModels.KpiMostNumerousSpecies, error) {
+func (pr *PetRepositoryPg) MostNumerousSpecies(ctx context.Context) (*apiModels.KpiMostNumerousSpecies, error) {
 
 	var response apiModels.KpiMostNumerousSpecies
 

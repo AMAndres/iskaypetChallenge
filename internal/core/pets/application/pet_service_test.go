@@ -25,7 +25,7 @@ var (
 	ctx               context.Context
 	mockCtrl          *gomock.Controller
 	mockPetRepository *mocks.MockPetRepository
-	petService        *PetServiceImpl
+	petService        PetService
 )
 
 var _ = Describe("PetService", func() {
@@ -35,6 +35,21 @@ var _ = Describe("PetService", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		mockPetRepository = mocks.NewMockPetRepository(mockCtrl)
 		petService = NewPetService(mockPetRepository)
+	})
+
+	Describe("Service", func() {
+		Context("Scenario - Create instance", func() {
+			It("Success - Instance created", func() {
+				service := NewPetService(mockPetRepository)
+				Expect(service).ToNot(BeNil())
+			})
+		})
+		Context("Scenario - Get instance", func() {
+			It("Success - Instance retrieved", func() {
+				service := GetService()
+				Expect(service).ToNot(BeNil())
+			})
+		})
 	})
 
 	Describe("AddPet()", func() {

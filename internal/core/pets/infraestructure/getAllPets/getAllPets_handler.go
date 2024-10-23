@@ -3,8 +3,8 @@ package infraestructure
 import (
 	"context"
 
-	petService "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
-	petMapper "github.com/AMAndres/iskaypetChallenge/internal/core/pets/infraestructure"
+	petApp "github.com/AMAndres/iskaypetChallenge/internal/core/pets/application"
+	petInfraMapper "github.com/AMAndres/iskaypetChallenge/internal/core/pets/infraestructure"
 	domainErrors "github.com/AMAndres/iskaypetChallenge/internal/core/transversal/domain/errors"
 	operationApi "github.com/AMAndres/iskaypetChallenge/restapi/operations/pets"
 	"github.com/go-openapi/runtime/middleware"
@@ -12,7 +12,7 @@ import (
 
 func GetAllPetsHandler(params operationApi.GetAllPetsParams) middleware.Responder {
 
-	pets, err := petService.GetService().GetAllPets(context.Background())
+	pets, err := petApp.PetServiceInstance.GetAllPets(context.Background())
 	if err != nil {
 		switch err.(type) {
 		case *domainErrors.NotFoundError:
@@ -22,6 +22,6 @@ func GetAllPetsHandler(params operationApi.GetAllPetsParams) middleware.Responde
 		}
 	}
 
-	response := petMapper.MapPetsDomainToApiModel(pets)
+	response := petInfraMapper.MapPetsDomainToApiModel(pets)
 	return operationApi.NewGetAllPetsOK().WithPayload(response)
 }

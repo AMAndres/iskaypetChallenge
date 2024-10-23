@@ -15,12 +15,12 @@ func InitDatabase() error {
 
 	db, err = sql.Open("postgres", getDBConfig())
 	if err != nil {
-		return fmt.Errorf("error al conectar a la base de datos. Error: %s", err.Error())
+		return fmt.Errorf("error opening connection to database. Error: %s", err.Error())
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return fmt.Errorf("error al verificar la conexión. Error: %s", err.Error())
+		return fmt.Errorf("error verifying database connection. Error: %s", err.Error())
 	}
 
 	return nil
